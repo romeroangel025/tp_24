@@ -59,11 +59,36 @@ const moviesController = {
     'buscar': async (req, res) => {
         try {
             const { titulo } = (req.query);
+let movie = {};
 
-            let response = await fetch(`http://www.omdbapi.com/?apikey=51849830&t=${titulo}`);
-            let result = await response.json()
+let result = await db.Movie.findOne({
+    where:{
+      title :{[Op.substring]: titulo} 
+    }
+});
 
-return res.send(result)
+if(result){
+ movie = {
+    Title : result.title,
+    Year : new Date(result.release_date).getFullYear(),
+    Poster : "default.png",
+    Awards : result.awards,
+    Runtime : result.length
+ }
+}else {
+    let response = await fetch(`http://www.omdbapi.com/?apikey=51849830&t=${titulo}`);
+    movie = await response.json()
+
+    
+
+
+}
+
+           
+
+return res.render('moviesDetailOmdb',{
+    movie 
+})
 
         } catch (error) {
             console.log(error);
